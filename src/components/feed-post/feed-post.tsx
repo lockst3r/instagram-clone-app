@@ -1,13 +1,26 @@
-import {View, Text, Image} from 'react-native';
-import React, {FC} from 'react';
+import {View, Text, Image, Pressable} from 'react-native';
+import React, {FC, useCallback, useState} from 'react';
 import Entypo from 'react-native-vector-icons/Entypo';
 import AntDesin from 'react-native-vector-icons/AntDesign';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Feather from 'react-native-vector-icons/Feather';
 import Comment from '../comment';
 import {IFeedPost} from './feed-post.interfaces';
+import {useBoolean} from '../../hooks/useBoolean';
+import DoublePress from '../double-press';
 
 const FeedPost: FC<IFeedPost> = ({post}) => {
+  const [isDescriptionExpanded, {toggle}] = useBoolean(false);
+  const [isLike, setIsLike] = useState(false);
+
+  const toggleDescriptioExpanded = useCallback(() => {
+    toggle();
+  }, [toggle]);
+
+  const toggleLike = useCallback(() => {
+    setIsLike(prev => !prev);
+  }, []);
+
   return (
     <View className="flex-1 mt-10">
       <View className="flex-row items-center p-2.5">
@@ -24,16 +37,25 @@ const FeedPost: FC<IFeedPost> = ({post}) => {
           style={{marginLeft: 'auto'}}
         />
       </View>
+      <DoublePress onDoublePress={toggleLike}>
+        <Image
+          source={{
+            uri: post.image,
+          }}
+          className="w-full aspect-square"
+        />
+      </DoublePress>
 
-      <Image
-        source={{
-          uri: post.image,
-        }}
-        className="w-full aspect-square"
-      />
       <View className="p-2.5">
         <View className="flex-row mb-1.5">
-          <AntDesin name={'hearto'} size={24} style={{marginHorizontal: 5}} />
+          <Pressable onPress={toggleLike}>
+            <AntDesin
+              name={isLike ? 'heart' : 'hearto'}
+              size={24}
+              style={{marginHorizontal: 5}}
+              color={isLike ? '#ED4956' : '#000'}
+            />
+          </Pressable>
           <Ionicons
             name={'chatbubble-outline'}
             size={24}
@@ -48,9 +70,14 @@ const FeedPost: FC<IFeedPost> = ({post}) => {
           <Text className="font-bold">{post.nofLikes} others</Text>
         </Text>
 
-        <Text className="leading-[18px]">
+        <Text
+          className="leading-[18px]"
+          numberOfLines={isDescriptionExpanded ? 0 : 3}>
           <Text className="font-bold">{post.user.username}</Text>
           {post.description}
+        </Text>
+        <Text onPress={toggleDescriptioExpanded}>
+          {isDescriptionExpanded ? 'less' : 'more'}
         </Text>
 
         <Text className="text-grey">View all {post.nofComments} comments</Text>
