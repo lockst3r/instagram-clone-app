@@ -8,8 +8,10 @@ import Comment from '../comment';
 import {IFeedPost} from './feed-post.interfaces';
 import {useBoolean} from '../../hooks/useBoolean';
 import DoublePress from '../double-press';
+import Carousel from '../carousel/carousel';
+import VideoPlayer from '../video-player';
 
-const FeedPost: FC<IFeedPost> = ({post}) => {
+const FeedPost: FC<IFeedPost> = ({post, isVisible}) => {
   const [isDescriptionExpanded, {toggle}] = useBoolean(false);
   const [isLike, setIsLike] = useState(false);
 
@@ -20,6 +22,28 @@ const FeedPost: FC<IFeedPost> = ({post}) => {
   const toggleLike = useCallback(() => {
     setIsLike(prev => !prev);
   }, []);
+
+  let content = null;
+  if (post.image) {
+    content = (
+      <DoublePress onDoublePress={toggleLike}>
+        <Image
+          source={{
+            uri: post.image,
+          }}
+          className="w-full aspect-square"
+        />
+      </DoublePress>
+    );
+  } else if (post.images) {
+    content = <Carousel images={post.images} onDoublePress={toggleLike} />;
+  } else if (post.video) {
+    content = (
+      <DoublePress onDoublePress={toggleLike}>
+        <VideoPlayer uri={post.video} paused={!isVisible} />
+      </DoublePress>
+    );
+  }
 
   return (
     <View className="flex-1 mt-10">
@@ -37,14 +61,8 @@ const FeedPost: FC<IFeedPost> = ({post}) => {
           style={{marginLeft: 'auto'}}
         />
       </View>
-      <DoublePress onDoublePress={toggleLike}>
-        <Image
-          source={{
-            uri: post.image,
-          }}
-          className="w-full aspect-square"
-        />
-      </DoublePress>
+
+      {content}
 
       <View className="p-2.5">
         <View className="flex-row mb-1.5">
