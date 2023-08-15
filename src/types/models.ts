@@ -18,7 +18,7 @@ export interface IUser {
   name?: string;
   bio?: string;
   posts?: IPost[];
-  wrbsite?: string;
+  website?: string;
 }
 
 export interface IComment {
